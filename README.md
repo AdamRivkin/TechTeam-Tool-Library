@@ -1,0 +1,2 @@
+# TechTeam-Tool-Library
+The Chicago Tool Library is a tool banks and community maker spaces that provides Chicagoans with access to tools and resources to learn, share, and create. TechTeam will help redesign and update the Library’s Resource Index page to help visitors find tool-related resources around the city. Additionally, we plan to add an interactive map feature to help people find the resource locations physically and, if time allows, a resource submission feature.
