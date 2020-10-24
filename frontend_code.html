@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- Insert into page header -->
+
+<script src="https://www.gstatic.com/firebasejs/7.24.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.24.0/firebase-database.js"></script>
+<script>
+    var firebaseConfig = {
+      apiKey: "AIzaSyA6b8VI6bMip3f91qVgj6JYfiWaKPdXnp0",
+      authDomain: "ctl-prac.firebaseapp.com",
+      databaseURL: "https://ctl-prac.firebaseio.com",
+      projectId: "ctl-prac",
+      storageBucket: "ctl-prac.appspot.com",
+      messagingSenderId: "300403040266",
+      appId: "1:300403040266:web:b0642a81fea48247e0bff3",
+      measurementId: "G-TEVE4LG3X6"
+    };
+    firebase.initializeApp(firebaseConfig);
+    
+    var legend = {
+      "Bikes" : "transportation",
+      "Cars" : "transportation",
+      "Camping" : "environment",
+      "Composting" : "environment",
+      "Community, Art, and Event Spaces" : "creative",
+      "Leather Arts" : "creative",
+      "Printmaking" : "creative",
+      "Weaving" : "creative",
+      "Computers and Tech" : "technology",
+      "Construction" : "construction",
+      "Makerspaces" : "construction",
+      "Reclaimed Materials" : "construction",
+      "Repair Events" : "construction",
+      "Tool Libraries" : "construction",
+      "Welding" : "construction",
+      "Woodworking" : "construction"
+    };
+    
+    function getLegend(category){
+      if(legend[category] == null){
+          return ""
+      } else {
+          return legend[category];
+      }
+    }
+    
+    function addCard(category, resource_name, resource){
+      var newCard = '<div class="resource-card"><b>' + resource_name + '</b><br>'
+      newCard += '<span class="tag ' + getLegend(category) + '">' + category + '</span>'
+      if(resource["address"] != null){
+          newCard += '<div class="location"><img src="https://cdn.iconscout.com/icon/free/png-256/location-pin-4-458123.png" class="mini-icon" alt="circle image"/>' + resource["address"] + '</div>';
+      }
+      if(resource["website"] != null){
+          newCard += '<img src="https://img.pngio.com/free-png-website-icons-konfest-website-icons-png-2000_2000.png" class="mini-icon" alt="circle image"/> <a class="website-link" href="' + resource["website"] + '">' + resource["website"] + '</a>';
+      }
+      if(resource["contact number"] != null){
+          newCard += '<div class="phone"> <img src="https://img.icons8.com/ios/452/phone.png" class="mini-icon" alt="circle image"/>' + resource["contact number"] + '</div>'
+      }
+      newCard += "</div>";
+      document.getElementById('search-results').innerHTML += newCard;
+    }
+    
+    var all_resources = {};
+    
+    function prepareCards(resources_object){
+      document.getElementById('search-results').innerHTML = "";
+      for (const [category, resources] of Object.entries(resources_object)) {
+        for(const [resource_name, resource] of Object.entries(resources)){
+          addCard(category, resource_name, resource);
+        }
+      }
+    }
+    
+    var database = firebase.database();
+    database.ref('/').once('value').then(function(snapshot) {
+    	all_resources = snapshot.val();
+      prepareCards(all_resources);
+    });
+    
+    function filterResults(){
+      var search_name = document.getElementById('search-input').value;
+      var current_resources = {};
+      for (const [category, resources] of Object.entries(all_resources)) {
+        for(const [resource_name, resource] of Object.entries(resources)){
+          if(resource_name.startsWith(search_name)){
+            if(current_resources[category] == null){
+              current_resources[category] = {};
+            }
+            current_resources[category][resource_name] = resource
+          }
+        }
+      }
+      prepareCards(current_resources);
+    }
+</script>
+
+
+<style>
+  .form-block .country { display: none;}
+  .lightbox-content .field.country { display: none;}
+  .resource-card {
+    background-color: white;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    padding-right: 8%;
+    padding-left: 8%;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    margin-bottom: 5px;
+  }
+  #search-container{
+    background-color: white;
+    padding: 15px;
+    height: 1000px;
+    overflow-y: scroll;
+  }
+  .results-text{
+    font-size: 20px;
+  }
+  .transportation{
+    background-color: #EF453F;
+  }
+  .construction{
+    background-color: #1980A1;
+  }
+  .environment{
+    background-color: #72C8AD;
+  }
+  .creative{
+    background-color: #F5714E;
+  }
+  .technology{
+    background-color: #372E32;
+  }
+  .tag{
+    border-radius: 25px;
+    color: white;
+    font-size: 14px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+  .location{
+    font-size: 15px;
+  }
+  .times{
+    font-size: 15px;
+  }
+  .website-link{
+    font-size: 15px;
+  }
+  .phone{
+    font-size: 15px;
+  }
+  .mini-icon{
+    width: 20px;
+    height:20px;
+  }
+  #search-button{
+    background-color:#372E32;
+    color:white;
+    border-radius: 5px;
+  }
+  #search-input{
+    width:90%;
+    background-color:#E5E5E5;
+    border-radius:5px;
+    border-width:0px;
+    color: #000000;
+  }
+  
+  #search-input:focus {
+    outline: none;
+  }
+</style>
+
+<!-- End insert into page header -->
+</head>
+
+<body>
+<!-- In code block -->
+
+<div id="search-container">
+  <div style=" display: flex;">
+  <div style="width:80%; margin-bottom: 10px; margin-right:5px; background-color:#E5E5E5; border-radius:5px; border-width:0px; padding:3px;">
+    <img src="https://img.icons8.com/ios/452/search--v1.png" style="width:16px;height:16px"/><input id="search-input" type="text" placeholder="Enter keywords"/>
+  </div>
+  <div>
+  <button type="submit" id="search-button" onClick="filterResults()">Search</button>
+  </div>
+  </div>
+<b class="results-text">Search Results</b>
+<div class="resource-card">
+  <b>Lorem Ipsum Bikes Company</b><br>
+  <span class="tag transportation">Bikes</span> <span class="tag construction">Repair events</span>
+  <div class="location"><img src="https://cdn.iconscout.com/icon/free/png-256/location-pin-4-458123.png" style="width: 20px; height:20px;" alt="circle image"/> 1234 Drury Lane, Chicago IL 60637</div>
+  <div class="times" style="width:100%"><img src="https://icons-for-free.com/iconfiles/png/512/clock+event+time+icon-1320196391238140860.png" style="width: 20px; height:20px;" alt="circle image"/>Monday<div style="float:right;">10am-6pm</div><br>
+    <div style="padding-left:20px">Tuesday<div style="float:right;">10am-6pm</div></div>
+    <div style="padding-left:20px">Wednesday<div style="float:right;">Closed</div></div>
+    <div style="padding-left:20px">Thursday<div style="float:right;">10am-6pm</div></div>
+    <div style="padding-left:20px">Friday<div style="float:right;">10am-6pm</div></div>
+    <div style="padding-left:20px">Saturday<div style="float:right;">9am-7pm</div></div>
+    <div style="padding-left:20px">Sunday<div style="float:right;">9am-7pm</div></div></div>
+  <img src="https://img.pngio.com/free-png-website-icons-konfest-website-icons-png-2000_2000.png" style="width: 20px; height:20px;" alt="circle image"/> <a class="website-link" href="www.loremimpsumbikes5eva.com">www.loremimpsumbikes5eva.com</a>
+ <div class="phone"> <img src="https://img.icons8.com/ios/452/phone.png" style="width: 20px; height:20px;" alt="circle image"/> (123)456-7890</div>
+</div>
+<div class="resource-card">
+  <b>Lorem Ipsum Bikes Company</b><br>
+  <span class="tag transportation">Bikes</span> <span class="tag construction">Repair events</span>
+  <div class="location"><img src="https://cdn.iconscout.com/icon/free/png-256/location-pin-4-458123.png" style="width: 20px; height:20px;" alt="circle image"/> 1234 Drury Lane, Chicago IL 60637</div>
+  <div class="times" style="width:100%"><img src="https://icons-for-free.com/iconfiles/png/512/clock+event+time+icon-1320196391238140860.png" style="width: 20px; height:20px;" alt="circle image"/>Monday<div style="float:right;">10am-6pm</div><br>
+    <div style="padding-left:20px">Tuesday<div style="float:right;">10am-6pm</div></div>
+    <div style="padding-left:20px">Wednesday<div style="float:right;">Closed</div></div>
+    <div style="padding-left:20px">Thursday<div style="float:right;">10am-6pm</div></div>
+    <div style="padding-left:20px">Friday<div style="float:right;">10am-6pm</div></div>
+    <div style="padding-left:20px">Saturday<div style="float:right;">9am-7pm</div></div>
+    <div style="padding-left:20px">Sunday<div style="float:right;">9am-7pm</div></div></div>
+  <img src="https://img.pngio.com/free-png-website-icons-konfest-website-icons-png-2000_2000.png" style="width: 20px; height:20px;" alt="circle image"/> <a class="website-link" href="www.loremimpsumbikes5eva.com">www.loremimpsumbikes5eva.com</a>
+ <div class="phone"> <img src="https://img.icons8.com/ios/452/phone.png" style="width: 20px; height:20px;" alt="circle image"/> (123)456-7890</div>
+</div>
+<div id="search-results"></div>
+<div class="footer">
+  <div style="display:flex;">
+  Showing results 1-2 of 10
+  <div style="margin-left: auto;">
+  	<span >❮</span>
+  	<span >❯</span>
+  </div>
+  </div>
+  <input type="checkbox"/> Update results when map moves
+</div>
+</div>
+<!-- Stop insert into codeblock -->
+
+</body>
+</html>
+
