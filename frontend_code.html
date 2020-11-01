@@ -1,10 +1,9 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <!-- Insert into page header -->
-
 <script src="https://www.gstatic.com/firebasejs/7.24.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/7.24.0/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.24.0/firebase-database.js"></script>
+<script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB8hoMNt7re3XiQdBmYDg1IhwUJTfuk7qA&callback=initMap&libraries=&v=weekly"
+      defer
+    ></script>
 <script>
     var firebaseConfig = {
       apiKey: "AIzaSyA6b8VI6bMip3f91qVgj6JYfiWaKPdXnp0",
@@ -83,22 +82,71 @@
       var current_resources = {};
       for (const [category, resources] of Object.entries(all_resources)) {
         for(const [resource_name, resource] of Object.entries(resources)){
-          if(resource_name.startsWith(search_name)){
+          if(resource_name.toLowerCase().includes(search_name.toLowerCase()) || category.toLowerCase().includes(search_name.toLowerCase())){
             if(current_resources[category] == null){
               current_resources[category] = {};
             }
-            current_resources[category][resource_name] = resource
+            current_resources[category][resource_name] = resource;
           }
         }
       }
+      console.log(current_resources);
       prepareCards(current_resources);
+    }
+    
+    function initMap() {
+      const map = new google.maps.Map(document.getElementById("map"), {
+        zoom: 8,
+        center: { lat: 40.72, lng: -73.96 },
+      });
+      const geocoder = new google.maps.Geocoder();
+      const infowindow = new google.maps.InfoWindow();
+      document.getElementById("submit").addEventListener("click", () => {
+        geocodePlaceId(geocoder, map, infowindow);
+      });
+      
+      function codeAddress(geocoder, map) {
+        geocoder.geocode({'address': address}, function(results, status) {
+          if (status === 'OK') {
+            map.setCenter(results[0].geometry.location);
+            var marker = new google.maps.Marker({
+              map: map,
+              position: results[0].geometry.location
+            });
+          } else {
+            alert('Geocode was not successful for the following reason: ' + status);
+          }
+        });
+      
+    }
+
+    // This function is called when the user clicks the UI button requesting
+    // a geocode of a place ID.
+    function geocodePlaceId(geocoder, map, infowindow) {
+      const placeId = document.getElementById("place-id").value;
+      geocoder.geocode({ placeId: placeId }, (results, status) => {
+        if (status === "OK") {
+          if (results[0]) {
+            map.setZoom(11);
+            map.setCenter(results[0].geometry.location);
+            const marker = new google.maps.Marker({
+              map,
+              position: results[0].geometry.location,
+            });
+            infowindow.setContent(results[0].formatted_address);
+            infowindow.open(map, marker);
+          } else {
+            window.alert("No results found");
+          }
+        } else {
+          window.alert("Geocoder failed due to: " + status);
+        }
+      });
     }
 </script>
 
 
 <style>
-  .form-block .country { display: none;}
-  .lightbox-content .field.country { display: none;}
   .resource-card {
     background-color: white;
     box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
@@ -106,7 +154,7 @@
     padding-left: 8%;
     padding-top: 10px;
     padding-bottom: 10px;
-    margin-bottom: 5px;
+    margin-bottom: 10px;
   }
   #search-container{
     background-color: white;
@@ -140,6 +188,7 @@
     padding-bottom: 5px;
     padding-right: 10px;
     padding-left: 10px;
+    margin-bottom: 5px;
   }
   .location{
     font-size: 15px;
@@ -174,65 +223,3 @@
     outline: none;
   }
 </style>
-
-<!-- End insert into page header -->
-</head>
-
-<body>
-<!-- In code block -->
-
-<div id="search-container">
-  <div style=" display: flex;">
-  <div style="width:80%; margin-bottom: 10px; margin-right:5px; background-color:#E5E5E5; border-radius:5px; border-width:0px; padding:3px;">
-    <img src="https://img.icons8.com/ios/452/search--v1.png" style="width:16px;height:16px"/><input id="search-input" type="text" placeholder="Enter keywords"/>
-  </div>
-  <div>
-  <button type="submit" id="search-button" onClick="filterResults()">Search</button>
-  </div>
-  </div>
-<b class="results-text">Search Results</b>
-<div class="resource-card">
-  <b>Lorem Ipsum Bikes Company</b><br>
-  <span class="tag transportation">Bikes</span> <span class="tag construction">Repair events</span>
-  <div class="location"><img src="https://cdn.iconscout.com/icon/free/png-256/location-pin-4-458123.png" style="width: 20px; height:20px;" alt="circle image"/> 1234 Drury Lane, Chicago IL 60637</div>
-  <div class="times" style="width:100%"><img src="https://icons-for-free.com/iconfiles/png/512/clock+event+time+icon-1320196391238140860.png" style="width: 20px; height:20px;" alt="circle image"/>Monday<div style="float:right;">10am-6pm</div><br>
-    <div style="padding-left:20px">Tuesday<div style="float:right;">10am-6pm</div></div>
-    <div style="padding-left:20px">Wednesday<div style="float:right;">Closed</div></div>
-    <div style="padding-left:20px">Thursday<div style="float:right;">10am-6pm</div></div>
-    <div style="padding-left:20px">Friday<div style="float:right;">10am-6pm</div></div>
-    <div style="padding-left:20px">Saturday<div style="float:right;">9am-7pm</div></div>
-    <div style="padding-left:20px">Sunday<div style="float:right;">9am-7pm</div></div></div>
-  <img src="https://img.pngio.com/free-png-website-icons-konfest-website-icons-png-2000_2000.png" style="width: 20px; height:20px;" alt="circle image"/> <a class="website-link" href="www.loremimpsumbikes5eva.com">www.loremimpsumbikes5eva.com</a>
- <div class="phone"> <img src="https://img.icons8.com/ios/452/phone.png" style="width: 20px; height:20px;" alt="circle image"/> (123)456-7890</div>
-</div>
-<div class="resource-card">
-  <b>Lorem Ipsum Bikes Company</b><br>
-  <span class="tag transportation">Bikes</span> <span class="tag construction">Repair events</span>
-  <div class="location"><img src="https://cdn.iconscout.com/icon/free/png-256/location-pin-4-458123.png" style="width: 20px; height:20px;" alt="circle image"/> 1234 Drury Lane, Chicago IL 60637</div>
-  <div class="times" style="width:100%"><img src="https://icons-for-free.com/iconfiles/png/512/clock+event+time+icon-1320196391238140860.png" style="width: 20px; height:20px;" alt="circle image"/>Monday<div style="float:right;">10am-6pm</div><br>
-    <div style="padding-left:20px">Tuesday<div style="float:right;">10am-6pm</div></div>
-    <div style="padding-left:20px">Wednesday<div style="float:right;">Closed</div></div>
-    <div style="padding-left:20px">Thursday<div style="float:right;">10am-6pm</div></div>
-    <div style="padding-left:20px">Friday<div style="float:right;">10am-6pm</div></div>
-    <div style="padding-left:20px">Saturday<div style="float:right;">9am-7pm</div></div>
-    <div style="padding-left:20px">Sunday<div style="float:right;">9am-7pm</div></div></div>
-  <img src="https://img.pngio.com/free-png-website-icons-konfest-website-icons-png-2000_2000.png" style="width: 20px; height:20px;" alt="circle image"/> <a class="website-link" href="www.loremimpsumbikes5eva.com">www.loremimpsumbikes5eva.com</a>
- <div class="phone"> <img src="https://img.icons8.com/ios/452/phone.png" style="width: 20px; height:20px;" alt="circle image"/> (123)456-7890</div>
-</div>
-<div id="search-results"></div>
-<div class="footer">
-  <div style="display:flex;">
-  Showing results 1-2 of 10
-  <div style="margin-left: auto;">
-  	<span >❮</span>
-  	<span >❯</span>
-  </div>
-  </div>
-  <input type="checkbox"/> Update results when map moves
-</div>
-</div>
-<!-- Stop insert into codeblock -->
-
-</body>
-</html>
-
