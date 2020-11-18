@@ -181,22 +181,10 @@
 	  }
 		
 		function prepareMarkers(all_resources){
-			var i = 0;
 			for (const [resource_name, resource] of Object.entries(all_resources)) {
-        i += 1;
-        setTimeout(function(){
-          geocoder.geocode({ address: resource["address"] }, (results, status) => {
-            if (status === "OK") {
-              if (results[0]) {
-                              console.log("Ok")
-                              console.log(results[0].geometry.location)
-                  addMarker(resource_name, results[0].geometry.location);
-              }
-            } else {
-              console.log("Not okay: " + status)
-            }
-          });
-        }, 500 * i);
+				if(resource["latitude"] != null && resource["longitude"] != null){
+					addMarker(resource_name, {"lat": resource["latitude"], "lng": resource["longitude"]});
+				}
 			}
 		}
 
