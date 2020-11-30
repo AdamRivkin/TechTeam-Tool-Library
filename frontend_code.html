@@ -15,25 +15,6 @@
 <script>
 
 
-	// error reporting
-
-	function reportError(clicked_id) {
-		var templateParams = {
-			message: clicked_id,
-		};
-
-		document.getElementById(clicked_id + "_error").innerHTML = "Thank you for reporting an error!"
-
-		emailjs.send('service_rt1e0xh', 'contact_form', templateParams)
-			.then(function (response) {
-				console.log('SUCCESS!', response.status, response.text);
-			}, function (error) {
-				console.log('FAILED...', error);
-			});
-	}
-
-
-
 	//database
 
 	var firebaseConfig = {
@@ -463,19 +444,3 @@
   }
   
 </style>
-
-<script src="https://smtpjs.com/v3/smtp.js">
-</script>
-<script>
-	function sendEmail() {
-		Email.send({
-			SecureToken: "3a749e5f-1001-4f0f-a46a-74bbd0524789",
-			To: 'pratham@uchicago.edu',
-			From: "noreply_error_report@ctl.com",
-			Subject: "Test email",
-			Body: "<html><h2>Header</h2><strong>Bold text</strong><br></br><em>Italic</em></html>"
-		}).then(
-			message => alert(message)
-		);
-	}
-</script>
