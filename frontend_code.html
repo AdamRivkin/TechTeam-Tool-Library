@@ -1,474 +1,481 @@
-<!DOCTYPE html>
-<html>
-	<head>
-  <!-- Insert into page header -->
-	<script
-	  src="https://www.gstatic.com/firebasejs/7.24.0/firebase-app.js"></script>
-	<script
-	  src="https://www.gstatic.com/firebasejs/7.24.0/firebase-database.js"></script>
-	<script
-	  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB8hoMNt7re3XiQdBmYDg1IhwUJTfuk7qA&callback=initMap&libraries=&v=weekly"defer></script>
-	<script>
-	  var firebaseConfig = {
-	    apiKey: "AIzaSyA6b8VI6bMip3f91qVgj6JYfiWaKPdXnp0",
-	    authDomain: "ctl-prac.firebaseapp.com",
-	    databaseURL: "https://ctl-prac.firebaseio.com",
-	    projectId: "ctl-prac",
-	    storageBucket: "ctl-prac.appspot.com",
-	    messagingSenderId: "300403040266",
-	    appId: "1:300403040266:web:b0642a81fea48247e0bff3",
-	    measurementId: "G-TEVE4LG3X6"
-	  };
-	  firebase.initializeApp(firebaseConfig);
+<script
+	src="https://www.gstatic.com/firebasejs/7.24.0/firebase-app.js"></script>
+<script
+	src="https://www.gstatic.com/firebasejs/7.24.0/firebase-database.js"></script>
+<script
+	src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB8hoMNt7re3XiQdBmYDg1IhwUJTfuk7qA&callback=initMap&libraries=&v=weekly"
+	defer></script>
+<script type="text/javascript"
+	src="https://cdn.jsdelivr.net/npm/emailjs-com@2/dist/email.min.js"></script>
+<script type="text/javascript">
+	(function () {
+		emailjs.init("user_uaGikcRsIprDtJCfybmU2");
+	})();
+</script>
+<script>
 
-	  var legend = {
-	    "Bikes": "transportation",
-	    "Cars": "transportation",
-	    "Camping": "environment",
-	    "Composting": "environment",
-	    "Community, Art, and Event Spaces": "creative",
-	    "Leather Arts": "creative",
-	    "Printmaking": "creative",
-	    "Weaving": "creative",
-	    "Computers and Tech": "technology",
-	    "Construction": "construction",
-	    "Makerspaces": "construction",
-	    "Reclaimed Materials": "construction",
-	    "Repair Events": "construction",
-	    "Tool Libraries": "construction",
-	    "Welding": "construction",
-	    "Woodworking": "construction"
-	  };
 
-	  function getLegend(category) {
-	    if (legend[category] == null) {
-	      return ""
-	    } else {
-	      return legend[category];
-	    }
-	  }
+	// error reporting
 
-	  function addCard(resource_name, resource) {
-	    var newCard = '<div class="resource-card" id="' + resource_name +'"><b>' + resource_name + '</b><br>'
-			if(resource["tags"] != null){
-				console.log(resource["tags"])
-        for(var i = 0; i < resource["tags"].length; i++){
-					let category = resource["tags"][i];
-          newCard += '<span class="tag ' + getLegend(category) + '">' + category + '</span>';
-        }
-      }
-	    if (resource["address"] != null) {
-	      newCard += '<div class="location"><img src="https://cdn.iconscout.com/icon/free/png-256/location-pin-4-458123.png" class="mini-icon" alt="circle image"/>' + resource["address"] + '</div>';
-	    }
-	    if (resource["website"] != null) {
-	      newCard += '<img src="https://img.pngio.com/free-png-website-icons-konfest-website-icons-png-2000_2000.png" class="mini-icon" alt="circle image"/> <a class="website-link" href="' + resource["website"] + '">' + resource["website"] + '</a>';
-	    }
-	    if (resource["contact number"] != null) {
-	      newCard += '<div class="phone"> <img src="https://img.icons8.com/ios/452/phone.png" class="mini-icon" alt="circle image"/>' + resource["contact number"] + '</div>'
-	    }
-	    newCard += "</div>";
-	    document.getElementById('search-results').innerHTML += newCard;
-	  }
-    
-    function showCard(target_name){
-			var i = 1;
-      for (const [resource_name, resource] of Object.entries(current)) {
-        if(target_name == resource_name){ done=true; break; } else { i += 1; }
-      }
-      page_num = Math.ceil(i / num_per_page);
-      prepareCards(current);
-      document.getElementById(target_name).scrollIntoView();
-    }
+	function reportError(clicked_id) {
+		var templateParams = {
+			message: clicked_id,
+		};
 
-	  var all_resources = {};
-	  var current = {};
-	  var page_num = 1;
-	  var num_per_page = 3;
-	  var tag_filters = [];
-	  var last_search = "";
-	  var map;
-	  var geocoder;
-	  var markers = {};
-    var infoWindow;
-	  
-		function getNumCurrent(){
-	    var num_current = 0
-	    for (const [resource_name, resource] of Object.entries(current)) {
-	      num_current += 1;
-	    }
-		  return num_current;
-	  }
+		document.getElementById(clicked_id + "_error").innerHTML = "Thank you for reporting an error!"
 
-		function prepareCards(resources_object) {
-	    current = resources_object;
-	    document.getElementById('search-results').innerHTML = "";
-	    var counter = 0;
-	    for (const [resource_name, resource] of Object.entries(resources_object)) {
-        if (counter >= (page_num - 1) * num_per_page && counter < page_num * num_per_page){
-          addCard(resource_name, resource);
-        }
-        counter += 1;
-	    }
-	    update_page_num();
-	  }
-	  
-	  function increment_page_num(){
-	    var num_current = getNumCurrent();
-	    page_num = Math.min(Math.ceil(num_current / num_per_page), page_num + 1);
-	    prepareCards(current);
-	  }
-				
-	function decrement_page_num(){
+		emailjs.send('service_rt1e0xh', 'contact_form', templateParams)
+			.then(function (response) {
+				console.log('SUCCESS!', response.status, response.text);
+			}, function (error) {
+				console.log('FAILED...', error);
+			});
+	}
+
+
+
+	//database
+
+	var firebaseConfig = {
+		apiKey: "AIzaSyA6b8VI6bMip3f91qVgj6JYfiWaKPdXnp0",
+		authDomain: "ctl-prac.firebaseapp.com",
+		databaseURL: "https://ctl-prac.firebaseio.com",
+		projectId: "ctl-prac",
+		storageBucket: "ctl-prac.appspot.com",
+		messagingSenderId: "300403040266",
+		appId: "1:300403040266:web:b0642a81fea48247e0bff3",
+		measurementId: "G-TEVE4LG3X6"
+	};
+	firebase.initializeApp(firebaseConfig);
+
+	var legend = {
+		"Bikes": "transportation",
+		"Cars": "transportation",
+		"Camping": "environment",
+		"Composting": "environment",
+		"Community, Art, and Event Spaces": "creative",
+		"Leather Arts": "creative",
+		"Printmaking": "creative",
+		"Weaving": "creative",
+		"Computers and Tech": "technology",
+		"Construction": "construction",
+		"Makerspaces": "construction",
+		"Reclaimed Materials": "construction",
+		"Repair Events": "construction",
+		"Tool Libraries": "construction",
+		"Welding": "construction",
+		"Woodworking": "construction"
+	};
+
+	function getLegend(category) {
+		if (legend[category] == null) {
+			return ""
+		} else {
+			return legend[category];
+		}
+	}
+
+	function addCard(resource_name, resource) {
+		var newCard = '<div class="resource-card" id="' + resource_name + '"><b>' + resource_name + '</b><br>'
+		if (resource["tags"] != null) {
+			console.log(resource["tags"])
+			for (var i = 0; i < resource["tags"].length; i++) {
+				let category = resource["tags"][i];
+				newCard += '<span class="tag ' + getLegend(category) + '">' + category + '</span>';
+			}
+		}
+		if (resource["address"] != null) {
+			newCard += '<div class="location"><img src="https://cdn.iconscout.com/icon/free/png-256/location-pin-4-458123.png" class="mini-icon" alt="circle image"/>' + resource["address"].link(encodeURI(`https://www.google.com/maps/dir/?api=1&destination=${resource_name}`)) + '</div>';
+		}
+		if (resource["website"] != null) {
+			newCard += '<img src="https://img.pngio.com/free-png-website-icons-konfest-website-icons-png-2000_2000.png" class="mini-icon" alt="circle image"/> <a class="website-link" href="' + resource["website"] + '">' + resource["website"] + '</a>';
+		}
+		if (resource["contact number"] != null) {
+			newCard += '<div class="phone"> <img src="https://img.icons8.com/ios/452/phone.png" class="mini-icon" alt="circle image"/>' + resource["contact number"] + '</div>'
+		}
+		document.getElementById('search-results').innerHTML += newCard;
+	}
+
+	function showCard(target_name) {
+		var i = 1;
+		for (const [resource_name, resource] of Object.entries(current)) {
+			if (target_name == resource_name) { done = true; break; } else { i += 1; }
+		}
+		page_num = Math.ceil(i / num_per_page);
+		prepareCards(current);
+		document.getElementById(target_name).scrollIntoView();
+	}
+
+	var all_resources = {};
+	var current = {};
+	var page_num = 1;
+	var num_per_page = 3;
+	var tag_filters = [];
+	var last_search = "";
+	var map;
+	var geocoder;
+	var markers = {};
+	var infoWindow;
+
+	function getNumCurrent() {
+		var num_current = 0
+		for (const [resource_name, resource] of Object.entries(current)) {
+			num_current += 1;
+		}
+		return num_current;
+	}
+
+	function prepareCards(resources_object) {
+		current = resources_object;
+		document.getElementById('search-results').innerHTML = "";
+		var counter = 0;
+		for (const [resource_name, resource] of Object.entries(resources_object)) {
+			if (counter >= (page_num - 1) * num_per_page && counter < page_num * num_per_page) {
+				addCard(resource_name, resource);
+			}
+			counter += 1;
+		}
+		update_page_num();
+	}
+
+	function increment_page_num() {
+		var num_current = getNumCurrent();
+		page_num = Math.min(Math.ceil(num_current / num_per_page), page_num + 1);
+		if (page_num == 0) {
+			page_num = 1;
+		}
+		prepareCards(current);
+	}
+
+	function decrement_page_num() {
 		page_num = Math.max(1, page_num - 1);
 		prepareCards(current);
 	}
-				
-	function update_page_num(){
+
+	function update_page_num() {
 		let lower_amount = Math.min((page_num * num_per_page) - 2, getNumCurrent());
 		let upper_amount = Math.min(page_num * num_per_page, getNumCurrent());
-	  document.getElementById("page_num_text").innerHTML = "Showing results " + lower_amount + "-" + upper_amount + " of " + getNumCurrent();
+		document.getElementById("page_num_text").innerHTML = "Showing results " + lower_amount + "-" + upper_amount + " of " + getNumCurrent();
 	}
 
-	  var database = firebase.database();
-	  database.ref('/').once('value').then(function (snapshot) {
-	    all_resources = snapshot.val();
-	    prepareCards(all_resources);
-			prepareMarkers(all_resources);
-	  });
-	  
-	  function searchName(){
-	    last_search = document.getElementById('search-input').value;
-	    filterResults();
-	  }
+	var database = firebase.database();
+	database.ref('/').once('value').then(function (snapshot) {
+		all_resources = snapshot.val();
+		prepareCards(all_resources);
+		prepareMarkers(all_resources);
+	});
 
-	  function filterResults() {
-	    var search_name = last_search;
-	    var current_resources = {};
-	    
-	    clearMarkers();
-	    for (const [resource_name, resource] of Object.entries(all_resources)) {
-        var tag_match = false;
-        var tag_filter = false;
-        for(const category in resource["tags"]){
-          if(category.toLowerCase().includes(search_name.toLowerCase())){
-            tag_match = true;
-          }
-          if(tag_filters.includes(category)){ tag_filter = true; }
-        }
-        if (resource_name.toLowerCase().includes(search_name.toLowerCase()) || tag_match) {
-          if(tag_filters.length == 0 || tag_filter){
-            current_resources[resource_name] = resource;
-						setMapOnName(map, resource_name)
-          }
-	      }
-	    }
-	    page_num = 1;
-	    prepareCards(current_resources);
-	  }
-	  
-	  async function filterByCtg(button) {
-	    var btn = button.innerHTML.trim();
-	    var current_resources = {};
-	    if(!tag_filters.includes(btn)){
-	      button.classList.add("filtered");
-	      tag_filters.push(btn);
-	    }else{
-	      button.classList.remove("filtered");
-	      tag_filters = tag_filters.filter(function(value, index, arr){ return value != btn;});
-	    }
-	    page_num = 1;
-	    await filterResults();
-	  }
-		
-		function prepareMarkers(all_resources){
-			for (const [resource_name, resource] of Object.entries(all_resources)) {
-				if(resource["latitude"] != null && resource["longitude"] != null){
-					addMarker(resource_name, {"lat": resource["latitude"], "lng": resource["longitude"]});
+	function searchName() {
+		last_search = document.getElementById('search-input').value;
+		filterResults();
+	}
+
+	function filterResults() {
+		var search_name = last_search;
+		var current_resources = {};
+
+		clearMarkers();
+		for (const [resource_name, resource] of Object.entries(all_resources)) {
+			var tag_match = false;
+			var tag_filter = false;
+			for (var j = 0; j < resource["tags"].length; j++) {
+				var category = resource["tags"][j];
+				if (category.toLowerCase().includes(search_name.toLowerCase())) {
+					tag_match = true;
+				}
+				if (tag_filters.includes(category)) { tag_filter = true; }
+			}
+			if (resource_name.toLowerCase().includes(search_name.toLowerCase()) || tag_match) {
+				if (tag_filters.length == 0 || tag_filter) {
+					current_resources[resource_name] = resource;
+					setMapOnName(map, resource_name)
 				}
 			}
 		}
+		page_num = 1;
+		prepareCards(current_resources);
+	}
 
-	  function initMap() {
-		    map = new google.maps.Map(document.getElementById("map"), {
-		      zoom: 8,
-		      center: {lat: 41.8781, lng: -87.6298},
-		    });
-		    geocoder = new google.maps.Geocoder();
-		    // document.getElementById("submit").addEventListener("click", () => {
-		    //  geocodePlaceId(geocoder, map);
-		    // })
-        infoWindow = new google.maps.InfoWindow({
-          content: "",
-        });
-		  }
-			
-	  // Adds a marker to the map and push to the array.
-			function addMarker(resource_name, location) {
-			  const marker = new google.maps.Marker({
-			    position: location,
-			    map: map,
-	            zoom: 11
-			  });
-        marker.addListener("click", () => {showCard(resource_name)});
-        marker.addListener('mouseover', function() {
-          infoWindow.setContent('<p>' + resource_name + '</p>');
-          infoWindow.open(map, this);
-        });
-        marker.addListener('mouseout', function() {
-          infoWindow.close();
-        });
-			  markers[resource_name] = marker;
-			}
-
-			// Sets the map on all markers in the array.
-			function setMapOnAll(one_map) {
-				for (const [resource_name, marker] of Object.entries(markers)){
-					 markers[resource_name].setMap(one_map);
-				}
-			}
-			
-			function setMapOnName(one_map, resource_name) {
-        if(markers[resource_name] != null){
-          markers[resource_name].setMap(one_map);
-        }
-			}
-
-			// Removes the markers from the map, but keeps them in the dictionary.
-			function clearMarkers() {
-			  setMapOnAll(null);
-			}
-
-			// Shows any markers currently in the dictionary.
-			function showMarkers() {
-			  setMapOnAll(map);
-			}
-
-			// Deletes all markers in the array by removing references to them.
-			function deleteMarkers() {
-			  clearMarkers();
-			  markers = {};
-			}
-	  
-	</script>
-
-
-	<style>
-	  
-	   @media only screen and (max-width: 600px){
-	    #map {
-	      display: none;
-	    }
-	  }
-	  .resource-card {
-	    background-color: white;
-	    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-	    padding-right: 8%;
-	    padding-left: 8%;
-	    padding-top: 10px;
-	    padding-bottom: 10px;
-	    margin-bottom: 10px;
-	  }
-
-	  #search-container {
-	    background-color: white;
-	    padding: 15px;
-	    /* height: 650px; */
-	    /* overflow-y: scroll; */
-	  }
-
-	  .results-text {
-	    font-size: 20px;
-	  }
-
-	  .transportation {
-	    background-color: #EF453F;
-	  }
-
-	  .construction {
-	    background-color: #1980A1;
-	  }
-
-	  .environment {
-	    background-color: #72C8AD;
-	  }
-
-	  .creative {
-	    background-color: #F5714E;
-	  }
-
-	  .technology {
-	    background-color: #372E32;
-	  }
-
-	  .tag {
-	    border-radius: 25px;
-	    color: white;
-	    font-size: 14px;
-	    padding-top: 5px;
-	    padding-bottom: 5px;
-	    padding-right: 10px;
-	    padding-left: 10px;
-	    margin-bottom: 5px;
-	  }
-
-	  .location {
-	    font-size: 15px;
-	  }
-
-	  .times {
-	    font-size: 15px;
-	  }
-
-	  .website-link {
-	    font-size: 15px;
-	  }
-
-	  .phone {
-	    font-size: 15px;
-	  }
-
-	  .mini-icon {
-	    width: 20px;
-	    height: 20px;
-	  }
-	  
-	  .filtered{
-	    box-shadow: 0 0 0 2px black;
-	  }
-		  
-	  .cat {
-	    border-style: none;
-	  }
-	  
-	  .cat:focus {
-	    outline: none;
-	  }
-
-	  #search-button {
-	    background-color: #372E32;
-	    color: white;
-	    border-radius: 5px;
-	  }
-
-	  #search-input {
-	    width: 90%;
-	    background-color: #E5E5E5;
-	    border-radius: 5px;
-	    border-width: 0px;
-	    color: #000000;
-	  }
-
-	  #search-input:focus {
-	    outline: none;
-	  }
-	</style>
-	<script src="https://smtpjs.com/v3/smtp.js">
-	</script>
-	<script>
-		function sendEmail() {
-			Email.send({
-				SecureToken : "3a749e5f-1001-4f0f-a46a-74bbd0524789",
-				To : 'pratham@uchicago.edu',
-				From : "noreply_error_report@ctl.com",
-				Subject : "Test email",
-				Body : "<html><h2>Header</h2><strong>Bold text</strong><br></br><em>Italic</em></html>"
-			}).then(
-			message => alert(message)
-			);
+	async function filterByCtg(button) {
+		var btn = button.innerHTML.trim();
+		var current_resources = {};
+		if (!tag_filters.includes(btn)) {
+			button.classList.add("filtered");
+			tag_filters.push(btn);
+		} else {
+			button.classList.remove("filtered");
+			tag_filters = tag_filters.filter(function (value, index, arr) { return value != btn; });
 		}
-	</script>
+		page_num = 1;
+		await filterResults();
+	}
 
+	function prepareMarkers(all_resources) {
+		for (const [resource_name, resource] of Object.entries(all_resources)) {
+			if (resource["latitude"] != null && resource["longitude"] != null) {
+				addMarker(resource_name, { "lat": resource["latitude"], "lng": resource["longitude"] });
+			}
+		}
+	}
 
-	<!-- End tags code block -->
+	function initMap() {
+		map = new google.maps.Map(document.getElementById("map"), {
+			zoom: 9,
+			center: { lat: 41.8781, lng: -87.6298 },
+		});
+		geocoder = new google.maps.Geocoder();
+		// document.getElementById("submit").addEventListener("click", () => {
+		//  geocodePlaceId(geocoder, map);
+		// })
+		infoWindow = new google.maps.InfoWindow({
+			content: "",
+		});
+	}
 
-	<!-- In search code block -->
+	// Adds a marker to the map and push to the array.
+	function addMarker(resource_name, location) {
+		const marker = new google.maps.Marker({
+			position: location,
+			map: map,
+			zoom: 11
+        });
+		marker.addListener("click", () => { showCard(resource_name) });
+		marker.addListener('mouseover', function () {
+          console.log("Mouseover: " + resource_name);
+          infoWindow.setContent('<p class="info-par">' + resource_name + '</p>');
+			infoWindow.open(map, this);
+		});
+		marker.addListener('mouseout', function () {
+			infoWindow.close();
+		});
+		markers[resource_name] = marker;
+	}
 
-	<div id="search-container">
-  <div style="display: flex;"/>
-  <div style="width: 80%; margin-bottom: 20px; margin-right:10px; 
-   background-color: #E5E5E5; border-radius:5px; border-width:0px; 
-   padding: 3px;"/>
-    <img src="https://img.icons8.com/ios/452/search--v1.png" style="width:16px;height:16px"/><input id="search-input" type="text" placeholder="Enter keywords e.g., bike repair"/>
-  </div>
-  <div>
-  <button type="submit" id="search-button" onClick="searchName()">Search</button>
-  </div>
-  </div>
-<b class="results-text">Search Results</b>
-<div id="search-results"></div>
-<div class="footer">
-  <div style="display:flex;">
-  <span id="page_num_text">Showing results 1-2 of 10</span>
-  <div class="pag" style="margin-left: auto;">
-	  	<a onClick="decrement_page_num()">❮</a>
-	  	<a onClick="increment_page_num()">❯</a>
-  </div>
-  </div>
-  <input type="checkbox"/> Update results when map moves
-</div>
-</div>
+	// Sets the map on all markers in the array.
+	function setMapOnAll(one_map) {
+		for (const [resource_name, marker] of Object.entries(markers)) {
+			markers[resource_name].setMap(one_map);
+		}
+	}
+
+	function setMapOnName(one_map, resource_name) {
+		if (markers[resource_name] != null) {
+			markers[resource_name].setMap(one_map);
+		}
+	}
+
+	// Removes the markers from the map, but keeps them in the dictionary.
+	function clearMarkers() {
+		setMapOnAll(null);
+	}
+
+	// Shows any markers currently in the dictionary.
+	function showMarkers() {
+		setMapOnAll(map);
+	}
+
+	// Deletes all markers in the array by removing references to them.
+	function deleteMarkers() {
+		clearMarkers();
+		markers = {};
+	}
+
+</script>
+
 
 <style>
- search-container {
-   display: flex;
-   width: 80%; 
-   margin-bottom: 10px; 
-   margin-right:5px; 
-   background-color: #E5E5E5; 
-   border-radius:5px; 
-   border-width:0px; 
-   padding: 3px;
- }
+	@media only screen and (max-width: 600px) {
+		#map {
+			display: none;
+		}
+	}
+
+	.resource-card {
+		background-color: whitesmoke;
+      color: black;
+		box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+		padding-right: 8%;
+		padding-left: 8%;
+		padding-top: 10px;
+		padding-bottom: 10px;
+		margin-bottom: 10px;
+	}
+
+	#search-container {
+		/*background-color: whitesmoke;*/
+		padding: 15px;
+		/* height: 650px; */
+		/* overflow-y: scroll; */
+	}
+
+	.results-text {
+		font-size: 20px;
+      color:black;
+	}
+
+	.transportation {
+		background-color: #EF453F;
+	}
+
+	.construction {
+		background-color: #1980A1;
+	}
+
+	.environment {
+		background-color: #72C8AD;
+	}
+
+	.creative {
+		background-color: #F5714E;
+	}
+
+	.technology {
+		background-color: #372E32;
+	}
+
+	.tag {
+		border-radius: 25px;
+		color: whitesmoke;
+		font-size: 14px;
+		padding-top: 5px;
+		padding-bottom: 5px;
+		padding-right: 10px;
+		padding-left: 10px;
+		margin-bottom: 5px;
+	}
+
+	.location {
+		font-size: 15px;
+	}
+
+	.times {
+		font-size: 15px;
+	}
+
+	.website-link {
+		font-size: 15px;
+	}
+
+	.phone {
+		font-size: 15px;
+	}
+
+	.mini-icon {
+		width: 20px;
+		height: 20px;
+	}
+
+	.filtered {
+		box-shadow: 0 0 0 2px black;
+	}
+
+	.cat {
+		border-style: none;
+	}
+
+	.cat:focus {
+		outline: none;
+	}
+
+	#search-button {
+		background-color: DodgerBlue;
+		color: white;
+		border-radius: 5px;
+		border: 1px solid transparent;
+		padding: 10px;
+		font-size: 16px;
+        position: absolute;
+
+	}
+
+	#search-input {
+		background-color: white;
+        border-style: solid;
+        border-color: black;
+		border-radius: 5px;
+		border-width: 0px;
+		color: #000000;
+	}
+
+	#search-input:focus {
+		outline: none;
+	}
+
+	* {
+		box-sizing: border-box;
+	}
+
+	.search_bar {
+		/* the container must be positioned relative: */
+        width: 60%;
+        left: 15%;
+		position: relative;
+		text-align: center;
+        
+	}
+
+	input {
+		border: 1px solid transparent;
+		background-color: #f1f1f1;
+		padding: 10px;
+		font-size: 16px;
+	}
+
+	input[type=text] {
+		background-color: #f1f1f1;
+		width: 100%;
+	}
+  
+	.autocomplete-items {
+    position: absolute;
+    border: 1px solid #d4d4d4;
+    border-bottom: none;
+    border-top: none;
+    z-index: 99;
+    /*position the autocomplete items to be the same width as the container:*/
+    top: 100%;
+    left: 0;
+    right: 0;
+    /* Make the list scrollable */
+    height:150px; 
+    overflow:hidden; 
+    overflow-y:scroll;
+  }
+  .autocomplete-items div {
+    padding: 10px;
+    cursor: pointer;
+    background-color: #fff;
+    border-bottom: 1px solid #d4d4d4;
+    text-align: left;
+  }
+  .autocomplete-items div:hover {
+    /*when hovering an item:*/
+    background-color: #e9e9e9;
+  }
+  .autocomplete-active {
+    /*when navigating through the items using the arrow keys:*/
+    background-color: DodgerBlue !important;
+    color: #ffffff;
+  }
+  
+ .info-par{
+   color:black;
+  }
+  
 </style>
 
-<!-- End search codeblock -->
-
-<!-- In maps code block -->
-
-<div id="floating-panel">
-    <input id="place-id" type="text" value="Input Address" />
-    <input id="submit" type="button" value="Get Address for Place ID"/>
-</div>
-<div>
-  <div id="map"></div>
-</div>
-
-<!-- End maps code block -->
-
-
-
-
-	<!-- <div class="resource-card">
-	  <b>Lorem Ipsum Bikes Company</b><br>
-	  <span class="tag transportation">Bikes</span> <span class="tag construction">Repair events</span>
-	  <div class="location">
-	  	<img src="https://cdn.iconscout.com/icon/free/png-256/location-pin-4-458123.png" style="width: 20px; height:20px;" alt="circle image"/> 1234 Drury Lane, Chicago IL 60637
-	  </div>
-	  <div class="times" style="width:100%"><img src="https://icons-for-free.com/iconfiles/png/512/clock+event+time+icon-1320196391238140860.png" style="width: 20px; height:20px;" alt="circle image"/>Monday<div style="float:right;">10am-6pm</div><br>
-	    <div style="padding-left:20px">Tuesday<div style="float:right;">10am-6pm</div></div>
-	    <div style="padding-left:20px">Wednesday<div style="float:right;">Closed</div></div>
-	    <div style="padding-left:20px">Thursday<div style="float:right;">10am-6pm</div></div>
-	    <div style="padding-left:20px">Friday<div style="float:right;">10am-6pm</div></div>
-	    <div style="padding-left:20px">Saturday<div style="float:right;">9am-7pm</div></div>
-	    <div style="padding-left:20px">Sunday<div style="float:right;">9am-7pm</div></div></div>
-	  <img src="https://img.pngio.com/free-png-website-icons-konfest-website-icons-png-2000_2000.png" style="width: 20px; height:20px;" alt="circle image"/> <a class="website-link" href="www.loremimpsumbikes5eva.com">www.loremimpsumbikes5eva.com</a>
-	 <div class="phone"> <img src="https://img.icons8.com/ios/452/phone.png" style="width: 20px; height:20px;" alt="circle image"/> (123)456-7890</div>
-	</div>
-	<div class="resource-card">
-	  <b>Lorem Ipsum Bikes Company</b><br>
-	  <span class="tag transportation">Bikes</span> <span class="tag construction">Repair events</span>
-	  <div class="location"><img src="https://cdn.iconscout.com/icon/free/png-256/location-pin-4-458123.png" style="width: 20px; height:20px;" alt="circle image"/> 1234 Drury Lane, Chicago IL 60637</div>
-	  <div class="times" style="width:100%"><img src="https://icons-for-free.com/iconfiles/png/512/clock+event+time+icon-1320196391238140860.png" style="width: 20px; height:20px;" alt="circle image"/>Monday<div style="float:right;">10am-6pm</div><br>
-	    <div style="padding-left:20px">Tuesday<div style="float:right;">10am-6pm</div></div>
-	    <div style="padding-left:20px">Wednesday<div style="float:right;">Closed</div></div>
-	    <div style="padding-left:20px">Thursday<div style="float:right;">10am-6pm</div></div>
-	    <div style="padding-left:20px">Friday<div style="float:right;">10am-6pm</div></div>
-	    <div style="padding-left:20px">Saturday<div style="float:right;">9am-7pm</div></div>
-	    <div style="padding-left:20px">Sunday<div style="float:right;">9am-7pm</div></div></div>
-	  <img src="https://img.pngio.com/free-png-website-icons-konfest-website-icons-png-2000_2000.png" style="width: 20px; height:20px;" alt="circle image"/> <a class="website-link" href="www.loremimpsumbikes5eva.com">www.loremimpsumbikes5eva.com</a>
-	 <div class="phone"> <img src="https://img.icons8.com/ios/452/phone.png" style="width: 20px; height:20px;" alt="circle image"/> (123)456-7890</div>
-	</div> -->
-
-	</body>
-</html>
-
+<script src="https://smtpjs.com/v3/smtp.js">
+</script>
+<script>
+	function sendEmail() {
+		Email.send({
+			SecureToken: "3a749e5f-1001-4f0f-a46a-74bbd0524789",
+			To: 'pratham@uchicago.edu',
+			From: "noreply_error_report@ctl.com",
+			Subject: "Test email",
+			Body: "<html><h2>Header</h2><strong>Bold text</strong><br></br><em>Italic</em></html>"
+		}).then(
+			message => alert(message)
+		);
+	}
+</script>
