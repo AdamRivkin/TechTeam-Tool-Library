@@ -5,18 +5,8 @@
 <script
 	src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB8hoMNt7re3XiQdBmYDg1IhwUJTfuk7qA&callback=initMap&libraries=&v=weekly"
 	defer></script>
-<script type="text/javascript"
-	src="https://cdn.jsdelivr.net/npm/emailjs-com@2/dist/email.min.js"></script>
-<script type="text/javascript">
-	(function () {
-		emailjs.init("user_uaGikcRsIprDtJCfybmU2");
-	})();
-</script>
 <script>
-
-
 	//database
-
 	var firebaseConfig = {
 		apiKey: "AIzaSyA6b8VI6bMip3f91qVgj6JYfiWaKPdXnp0",
 		authDomain: "ctl-prac.firebaseapp.com",
@@ -92,6 +82,7 @@
 	var page_num = 1;
 	var num_per_page = 3;
 	var tag_filters = [];
+  	var all_tags = [];
 	var last_search = "";
 	var map;
 	var geocoder;
@@ -139,12 +130,30 @@
 		document.getElementById("page_num_text").innerHTML = "Showing results " + lower_amount + "-" + upper_amount + " of " + getNumCurrent();
 	}
 
+
+
 	var database = firebase.database();
 	database.ref('/').once('value').then(function (snapshot) {
 		all_resources = snapshot.val();
 		prepareCards(all_resources);
 		prepareMarkers(all_resources);
+      	getAllTags(all_resources);
 	});
+
+	function getAllTags(resources_object) {
+      current = resources_object;
+      document.getElementById('search-results').innerHTML = "";
+      var counter = 0;
+      for (const [resource_name, resource] of Object.entries(resources_object)) {
+        for (var j = 0; j < resource["tags"].length; j++) {
+          var tag = resource["tags"][j];
+          if (all_tags.includes(tag)) { }
+          else {
+            all_tags.push(tag);
+          }
+        }
+      }
+    }
 
 	function searchName() {
 		last_search = document.getElementById('search-input').value;
@@ -261,12 +270,22 @@
 		markers = {};
 	}
 
+
+
+var some_input = document.getElementById("search-input");
+some_input.addEventListener("keyup", function(event) {
+  if (event.keyCode === 13) {
+   event.preventDefault();
+   searchName();
+  }
+});
+  
 </script>
 
 
 <style>
 	@media only screen and (max-width: 600px) {
-		#map {
+		#map-box {
 			display: none;
 		}
 	}
@@ -443,4 +462,23 @@
    color:black;
   }
   
+  .sqs-block {
+margin-left: 0px;
+margin-right: -15px;
+margin-top -10px;
+margin-bottom: -10px;
+width:100%;
+}
+  
+#results-box{
+  }
+  
+#map-box {
+margin-left: -30px;
+  }
+
+.content-wrapper{
+  max-width:100% !important; 
+  padding:0px !important;
+  }
 </style>
